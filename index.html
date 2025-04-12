@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BK AlgoX - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0a0e17;
+            background-image: linear-gradient(rgba(10, 14, 23, 0.9), rgba(10, 14, 23, 0.9)),
+                            url('https://images.unsplash.com/photo-1560221328-12fe60f83ab8?auto=format&fit=crop&q=80');
+            background-size: cover;
+        }
+        .glass-effect {
+            background: rgba(30, 41, 59, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Main Login Card -->
+        <div class="glass-effect rounded-xl p-8 shadow-2xl fade-in" id="loginCard">
+            <div class="text-center mb-8">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='24' fill='%230ea5e9' text-anchor='middle' dominant-baseline='middle'%3EBK AlgoX%3C/text%3E%3C/svg%3E" alt="BK AlgoX Logo" class="h-12 mx-auto mb-4">
+                <h1 class="text-2xl font-semibold text-white mb-2">Welcome to BK AlgoX</h1>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <input type="text" id="username" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Username or Email ID" required>
+                </div>
+                <div class="relative">
+                    <input type="password" id="password" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Password" required>
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300" onclick="togglePassword()">
+                        <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                    </button>
+                </div>
+                <button type="button" onclick="handleForgotPassword()" class="text-blue-400 hover:text-blue-300 text-sm float-right">Forgot Password?</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <span>Login</span>
+                    <span id="loginSpinner" class="ml-2 hidden">
+                        <i class="bi bi-arrow-repeat loading-spinner"></i>
+                    </span>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-400">OR</p>
+                <button onclick="handleGoogleLogin()" id="googleLoginBtn" class="mt-4 w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-gray-800 font-semibold py-3 px-4 rounded-lg transition duration-200">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                    <span>Login with Gmail</span>
+                    <span id="googleSpinner" class="ml-2 hidden">
+                        <i class="bi bi-arrow-repeat loading-spinner text-gray-600"></i>
+                    </span>
+                </button>
+            </div>
+
+            <p class="text-gray-400 text-center mt-6">Powering Your Trades with Intelligence</p>
+        </div>
+
+        <!-- Forgot Password Card -->
+        <div class="glass-effect rounded-xl p-8 shadow-2xl hidden fade-in" id="forgotCard">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-2">Reset Password</h2>
+                <p class="text-gray-400">Enter your email to receive a reset code</p>
+            </div>
+
+            <form id="forgotForm" class="space-y-4">
+                <input type="email" id="resetEmail" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Enter your email" required>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <span>Send Reset Code</span>
+                    <span id="resetSpinner" class="ml-2 hidden">
+                        <i class="bi bi-arrow-repeat loading-spinner"></i>
+                    </span>
+                </button>
+                <button type="button" onclick="showLogin()" class="w-full border border-gray-600 text-gray-300 font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-200">Back to Login</button>
+            </form>
+        </div>
+
+        <!-- OTP Verification Card -->
+        <div class="glass-effect rounded-xl p-8 shadow-2xl hidden fade-in" id="otpCard">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-2">Enter OTP</h2>
+                <p class="text-gray-400">Enter the code sent to your email</p>
+            </div>
+
+            <form id="otpForm" class="space-y-4">
+                <div class="flex gap-2 justify-center">
+                    <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-slate-800 border border-slate-700 text-white rounded-lg focus:outline-none focus:border-blue-500 otp-input" required>
+                    <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-slate-800 border border-slate-700 text-white rounded-lg focus:outline-none focus:border-blue-500 otp-input" required>
+                    <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-slate-800 border border-slate-700 text-white rounded-lg focus:outline-none focus:border-blue-500 otp-input" required>
+                    <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-slate-800 border border-slate-700 text-white rounded-lg focus:outline-none focus:border-blue-500 otp-input" required>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-400 text-sm mb-2">Didn't receive code?</p>
+                    <button type="button" id="resendOtp" class="text-blue-400 hover:text-blue-300 text-sm">Resend OTP</button>
+                    <p id="otpTimer" class="text-gray-400 text-sm mt-1">Resend in <span id="countdownTimer">60</span>s</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <span>Verify OTP</span>
+                    <span id="otpSpinner" class="ml-2 hidden">
+                        <i class="bi bi-arrow-repeat loading-spinner"></i>
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- New Password Card -->
+        <div class="glass-effect rounded-xl p-8 shadow-2xl hidden fade-in" id="newPasswordCard">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-2">Set New Password</h2>
+                <p class="text-gray-400">Enter your new password</p>
+            </div>
+
+            <form id="newPasswordForm" class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="newPassword" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="New Password" required>
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300" onclick="toggleNewPassword()">
+                        <i class="bi bi-eye-slash" id="newToggleIcon"></i>
+                    </button>
+                </div>
+                <div class="relative">
+                    <input type="password" id="confirmPassword" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Confirm Password" required>
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300" onclick="toggleConfirmPassword()">
+                        <i class="bi bi-eye-slash" id="confirmToggleIcon"></i>
+                    </button>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-gray-400 text-sm">Password must contain:</p>
+                    <p id="lengthCheck" class="text-red-400 text-xs flex items-center"><i class="bi bi-x-circle mr-1"></i> At least 8 characters</p>
+                    <p id="upperCheck" class="text-red-400 text-xs flex items-center"><i class="bi bi-x-circle mr-1"></i> At least one uppercase letter</p>
+                    <p id="numberCheck" class="text-red-400 text-xs flex items-center"><i class="bi bi-x-circle mr-1"></i> At least one number</p>
+                    <p id="specialCheck" class="text-red-400 text-xs flex items-center"><i class="bi bi-x-circle mr-1"></i> At least one special character</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <span>Reset Password</span>
+                    <span id="resetPasswordSpinner" class="ml-2 hidden">
+                        <i class="bi bi-arrow-repeat loading-spinner"></i>
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="successModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+            <div class="absolute inset-0 bg-black opacity-50"></div>
+            <div class="glass-effect rounded-xl p-8 shadow-2xl z-10 max-w-md w-full mx-4 fade-in">
+                <div class="text-center">
+                    <div class="text-green-500 text-5xl mb-4">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2" id="successTitle">Success!</h3>
+                    <p class="text-gray-300 mb-6" id="successMessage">Your action was completed successfully.</p>
+                    <button onclick="closeModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            }
+        }
+
+        function toggleNewPassword() {
+            const passwordInput = document.getElementById('newPassword');
+            const toggleIcon = document.getElementById('newToggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            }
+        }
+
+        function toggleConfirmPassword() {
+            const passwordInput = document.getElementById('confirmPassword');
+            const toggleIcon = document.getElementById('confirmToggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            }
+        }
+
+        // Show different cards
+        function showCard(cardId) {
+            document.querySelectorAll('.glass-effect:not(#successModal > .glass-effect)').forEach(card => {
+                card.classList.add('hidden');
+            });
+            document.getElementById(cardId).classList.remove('hidden');
+        }
+
+        function showLogin() {
+            showCard('loginCard');
+        }
+
+        function handleForgotPassword() {
+            showCard('forgotCard');
+        }
+
+        // Handle form submissions
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Show loading spinner
+            document.getElementById('loginSpinner').classList.remove('hidden');
+            
+            // Simulate API call
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                // Add your login logic here
+                console.log('Login attempt:', { username, password });
+                
+                // Show success message or handle errors
+                showSuccessModal('Login Successful', 'Welcome back to BK AlgoX.');
+            } catch (error) {
+                console.error('Login failed:', error);
+            } finally {
+                // Hide loading spinner
+                document.getElementById('loginSpinner').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value;
+            
+            // Show loading spinner
+            document.getElementById('resetSpinner').classList.remove('hidden');
+            
+            try {
+                // Simulate sending OTP
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                console.log('Sending OTP to:', email);
+                
+                // Show OTP verification screen
+                showCard('otpCard');
+                
+                // Start OTP timer
+                startOtpTimer();
+            } catch (error) {
+                console.error('Error sending OTP:', error);
+            } finally {
+                document.getElementById('resetSpinner').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading spinner
+            document.getElementById('otpSpinner').classList.remove('hidden');
+            
+            // Collect OTP
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            
+            try {
+                // Simulate OTP verification
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                console.log('Verifying OTP:', otp);
+                
+                // Show new password screen
+                showCard('newPasswordCard');
+            } catch (error) {
+                console.error('Error verifying OTP:', error);
+            } finally {
+                document.getElementById('otpSpinner').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('newPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate password
+            if (!validatePassword(newPassword)) {
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            // Show loading spinner
+            document.getElementById('resetPasswordSpinner').classList.remove('hidden');
+            
+            try {
+                // Reset password logic here
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                console.log('Password reset successful');
+                
+                // Show success message
+                showSuccessModal('Password Reset Successful', 'Your password has been updated. You can now login with your new password.');
+            } catch (error) {
+                console.error('Error resetting password:', error);
+            } finally {
+                document.getElementById('resetPasswordSpinner').classList.add('hidden');
+            }
+        });
+
+        // Auto-focus next OTP input
+        document.querySelectorAll('.otp-input').forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value && index < 3) {
+                    document.querySelectorAll('.otp-input')[index + 1].focus();
+                }
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                // Allow backspace to go to previous input
+                if (e.key === 'Backspace' && index > 0 && !e.target.value) {
+                    document.querySelectorAll('.otp-input')[index - 1].focus();
+                }
+            });
+        });
+
+        // Handle OTP input restrictions
+        document.querySelectorAll('.otp-input').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (!/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Handle paste event for OTP
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text');
+                const otpDigits = pastedData.replace(/\D/g, '').substring(0, 4);
+                
+                if (otpDigits) {
+                    const inputs = document.querySelectorAll('.otp-input');
+                    [...otpDigits].forEach((digit, i) => {
+                        if (i < inputs.length) {
+                            inputs[i].value = digit;
+                        }
+                    });
+                    
+                    // Focus on the last input or the one after the last filled input
+                    const lastIndex = Math.min(otpDigits.length, inputs.length - 1);
+                    inputs[lastIndex].focus();
+                }
+            });
+        });
+
+        // Google Login handler
+        function handleGoogleLogin() {
+            const googleBtn = document.getElementById('googleLoginBtn');
+            const googleSpinner = document.getElementById('googleSpinner');
+            
+            // Disable button and show spinner
+            googleBtn.disabled = true;
+            googleSpinner.classList.remove('hidden');
+            
+            // Simulate Google OAuth login
+            setTimeout(() => {
+                console.log('Google login successful');
+                showSuccessModal('Google Login Successful', 'You have been logged in successfully using Google.');
+                
+                // Enable button and hide spinner
+                googleBtn.disabled = false;
+                googleSpinner.classList.add('hidden');
+            }, 2000);
+        }
+
+        // OTP Timer
+        function startOtpTimer() {
+            const timerElement = document.getElementById('countdownTimer');
+            const resendButton = document.getElementById('resendOtp');
+            const timerDisplay = document.getElementById('otpTimer');
+            
+            // Disable resend button
+            resendButton.disabled = true;
+            resendButton.classList.add('text-gray-500', 'cursor-not-allowed');
+            resendButton.classList.remove('text-blue-400', 'hover:text-blue-300');
+            
+            let timeLeft = 60;
+            timerElement.textContent = timeLeft;
+            
+            const timerInterval = setInterval(() => {
+                timeLeft -= 1;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    resendButton.disabled = false;
+                    resendButton.classList.remove('text-gray-500', 'cursor-not-allowed');
+                    resendButton.classList.add('text-blue-400', 'hover:text-blue-300');
+                    timerDisplay.classList.add('hidden');
+                }
+            }, 1000);
+            
+            // Handle resend click
+            resendButton.addEventListener('click', () => {
+                if (!resendButton.disabled) {
+                    // Simulate resending OTP
+                    console.log('Resending OTP...');
+                    timerDisplay.classList.remove('hidden');
+                    startOtpTimer();
+                }
+            });
+        }
+
+        // Password validation
+        const newPasswordInput = document.getElementById('newPassword');
+        newPasswordInput.addEventListener('input', () => validatePassword(newPasswordInput.value));
+
+        function validatePassword(password) {
+            const lengthCheck = document.getElementById('lengthCheck');
+            const upperCheck = document.getElementById('upperCheck');
+            const numberCheck = document.getElementById('numberCheck');
+            const specialCheck = document.getElementById('specialCheck');
+            
+            const hasLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            updateValidationItem(lengthCheck, hasLength);
+            updateValidationItem(upperCheck, hasUpper);
+            updateValidationItem(numberCheck, hasNumber);
+            updateValidationItem(specialCheck, hasSpecial);
+            
+            return hasLength && hasUpper && hasNumber && hasSpecial;
+        }
+
+        function updateValidationItem(element, isValid) {
+            const icon = element.querySelector('i');
+            
+            if (isValid) {
+                element.classList.remove('text-red-400');
+                element.classList.add('text-green-400');
+                icon.classList.remove('bi-x-circle');
+                icon.classList.add('bi-check-circle');
+            } else {
+                element.classList.remove('text-green-400');
+                element.classList.add('text-red-400');
+                icon.classList.remove('bi-check-circle');
+                icon.classList.add('bi-x-circle');
+            }
+        }
+
+        // Success Modal
+        function showSuccessModal(title, message) {
+            document.getElementById('successTitle').textContent = title;
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            showLogin();
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
